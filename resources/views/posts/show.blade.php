@@ -6,7 +6,7 @@
 
 {{-- Contenido de la pagina - Foto, likes, comentarios --}}
 @section('contenido')
-    <div class="container mx-auto flex">
+    <div class="container mx-auto flex flex-col md:flex-row">
 
         {{-- Contenido de la seccion izquierda de la web (tamaño grande) foto, likes y boton de eliminar--}}
         <div class="md:w-1/2">
@@ -15,13 +15,11 @@
             <img src="{{ asset('uploads' . '/' . $post->imagen) }}" alt="Imagen del post {{ $post->titulo }}">
 
             {{-- Likes --}}
-            <div class="p-2 flex items-center gap-2">
-                
-                <livewire:like-post :post="$post" />
-                
-        
-            </div> 
-
+            @auth()
+                <div class="p-2 flex items-center gap-2">                
+                    <livewire:like-post :post="$post" />
+                </div>
+            @endauth
             {{-- Fecha, hora y nombre de usuario--}}
             <div class="px-2">
                 <p class="font-bold"> {{ $post->user->username }} </p>
@@ -29,12 +27,12 @@
             </div>
 
             {{-- Boton de eliminar Post--}}
-            @auth                
+            @auth
                 @if ($post->user->username === auth()->user()->username)
                     <form method="POST" action="{{ route('posts.destroy', $post) }}">
                         @method('DELETE')
                         @csrf
-                        <input type="submit" value="Eliminar Publicación" class="bg-red-500 hover:bg-red-600 p-2 rounded 
+                        <input type="submit" value="Eliminar Publicación" class="bg-red-500 hover:bg-red-600 p-2 rounded
                         text-white font-bold mt-4 cursor-pointer">
                     </form>
                 @endif
@@ -53,15 +51,15 @@
                         {{ session('mensaje') }}
                     </div>
                 @endif
-                
+
                 {{-- Verificamos la autenticación de comentarios para habilitar la caja --}}
-                @auth()                  
+                @auth()
                     <div class="my-10">
                         <form action="{{route('comentarios.store', ["post" => $post, "user" => $user])}}" method="POST">
-                            @csrf                        
+                            @csrf
                             <label for="comentario" class="mb-2 mt-2 block uppercase text-gray-500 font-bold">Agrega un comentario</label>
                             <textarea name="comentario" id="comentario" placeholder="Agrega un comentario" class="border p-3 w-full rounded-lg @error('titulo') border-red-500 @enderror"></textarea>
-        
+
                             @error('comentario')
                                 <p class=" bg-red-500 text-white my-2 text-sm p-2 rounded-lg text-center">{{$message}}</p>
                             @enderror
@@ -71,11 +69,11 @@
                         </form>
                     </div> <!-- Fin de campo -->
                 @endauth
-                
+
                 {{-- Muestra los comentarios del post --}}
                 <div class="shadow mb-5 bg-white p-5 max-h-95 overflow-y-scroll mt-10 ">
 
-                    @if ($post->comentarios->count()) 
+                    @if ($post->comentarios->count())
                         @foreach ($post->comentarios as $comentario)
 
                             <div class="p-5 border-gray-300 border-b {{ $loop->last ? 'border-b-0' : '' }}">
@@ -95,7 +93,7 @@
                                     {{-- Botón de eliminar comentario --}}
 
                                     @if ($comentario->user->username === auth()->user()->username)
-                                    
+
                                         <form method="POST" action="{{route('comentarios.destroy', ["post" => $post, "user" => $user->username, "comentario" => $comentario])}}">
                                             @csrf
                                             @method('DELETE')
@@ -104,7 +102,7 @@
                                     @endif
                                 </div>
 
-                                
+
 
                             </div>
                         @endforeach
@@ -116,8 +114,8 @@
 
             </div>
         </div> {{-- Fin comentarios --}}
-        
-    </div>    
+
+    </div>
 
 @endsection
 
